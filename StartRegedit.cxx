@@ -142,7 +142,10 @@ EXTERN_C DECLSPEC_NORETURN void __cdecl WinMainCRTStartup()
 
 	if (req32)
 	{
-		reqMachine = IMAGE_FILE_MACHINE_I386;
+		if (GetSystemWow64Directory2(buf, cchMaxSysDir, IMAGE_FILE_MACHINE_ARMNT))
+			reqMachine = IMAGE_FILE_MACHINE_ARMNT;
+		else
+			reqMachine = IMAGE_FILE_MACHINE_I386;
 	}
 
 	if (reqMachine)
