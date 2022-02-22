@@ -13,6 +13,7 @@
 #pragma warning(disable : 4706 /*assignment within conditional expression*/ )
 #define WINVER 0x501
 #include <windows.h>
+#include <shellapi.h>
 #include <tchar.h>
 
 template<class T> static DECLSPEC_NOINLINE T GetProcAddr(LPCSTR Mod, LPCSTR Exp)
@@ -54,7 +55,7 @@ static UINT IsSwitchWorker(PCTSTR Switch, PCTSTR String, UINT Len)
 EXTERN_C DECLSPEC_NORETURN void __cdecl WinMainCRTStartup()
 {
 	const UINT cchMaxSysDir = MAX_PATH - 1;
-	BOOL native32 = sizeof(void*) < 8 && IsWow64Process(), allowWinDirFallback = native32;
+	BOOL native32 = sizeof(void*) < 8 && !IsWow64Process(), allowWinDirFallback = native32;
 	UINT ec = 0, cch;
 	UINT high = false, lua = false, req32 = false, showCmd = SW_SHOWDEFAULT;
 	WORD reqMachine = 0;
@@ -128,7 +129,7 @@ EXTERN_C DECLSPEC_NORETURN void __cdecl WinMainCRTStartup()
 		if (*p)
 		{
 			static const char msg[] = ""
-				"StartRegedit v0.1" "\n" 
+				"StartRegedit v0.2" "\n" 
 				"Copyright (C) Anders Kjersem" "\n"
 				"" "\n"
 				"Usage: [/NoElevate] [/Maximized] [/32|/x86|/ARM]";
@@ -142,9 +143,11 @@ EXTERN_C DECLSPEC_NORETURN void __cdecl WinMainCRTStartup()
 
 	if (req32)
 	{
+#ifdef _WIN64
 		if (GetSystemWow64Directory2(buf, cchMaxSysDir, IMAGE_FILE_MACHINE_ARMNT))
 			reqMachine = IMAGE_FILE_MACHINE_ARMNT;
 		else
+#endif
 			reqMachine = IMAGE_FILE_MACHINE_I386;
 	}
 
